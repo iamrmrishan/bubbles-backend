@@ -36,8 +36,29 @@ import { ContentReportsModule } from './content-reports/content-reports.module';
 
 import { ContentsModule } from './contents/contents.module';
 
+import { CreatorAttributesModule } from './creator-attributes/creator-attributes.module';
+
+import { ContentAttributesModule } from './content-attributes/content-attributes.module';
+
+import { SearchPreferencesModule } from './search-preferences/search-preferences.module';
+
+import { SubscriptionPlansModule } from './subscription-plans/subscription-plans.module';
+
+import { SubscriptionsModule } from './subscriptions/subscriptions.module';
+
+import { MessagesModule } from './messages/messages.module';
+
+import { VerificationsModule } from './verifications/verifications.module';
+
 @Module({
   imports: [
+    VerificationsModule,
+    MessagesModule,
+    SubscriptionsModule,
+    SubscriptionPlansModule,
+    SearchPreferencesModule,
+    ContentAttributesModule,
+    CreatorAttributesModule,
     ContentsModule,
     ContentReportsModule,
     UserBlocksModule,
