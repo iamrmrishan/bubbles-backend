@@ -1,4 +1,4 @@
-import { FileType } from '../../files/domain/file';
+import { Content } from '../../contents/domain/content';
 import { User } from '../../users/domain/user';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -22,10 +22,10 @@ export class ContentReport {
   reason?: string | null;
 
   @ApiProperty({
-    type: () => FileType,
+    type: () => Content,
     nullable: false,
   })
-  contentId: FileType;
+  contentId: Content;
 
   @ApiProperty({
     type: () => User,

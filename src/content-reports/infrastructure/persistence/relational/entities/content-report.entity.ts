@@ -1,5 +1,3 @@
-import { FileEntity } from '../../../../../files/infrastructure/persistence/relational/entities/file.entity';
-
 import { UserEntity } from '../../../../../users/infrastructure/persistence/relational/entities/user.entity';
 
 import {
@@ -11,6 +9,7 @@ import {
   Column,
 } from 'typeorm';
 import { EntityRelationalHelper } from '../../../../../utils/relational-entity-helper';
+import { ContentEntity } from '../../../../../contents/infrastructure/persistence/relational/entities/content.entity';
 
 @Entity({
   name: 'content_report',
@@ -34,8 +33,8 @@ export class ContentReportEntity extends EntityRelationalHelper {
   })
   reason?: string | null;
 
-  @ManyToOne(() => FileEntity, { eager: true, nullable: false })
-  contentId: FileEntity;
+  @ManyToOne(() => ContentEntity, { eager: true, nullable: false })
+  contentId: ContentEntity;
 
   @ManyToOne(() => UserEntity, { eager: true, nullable: true })
   reporterId?: UserEntity | null;

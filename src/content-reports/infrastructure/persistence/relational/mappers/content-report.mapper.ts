@@ -1,10 +1,10 @@
 import { ContentReport } from '../../../../domain/content-report';
 
-import { FileMapper } from '../../../../../files/infrastructure/persistence/relational/mappers/file.mapper';
 
 import { UserMapper } from '../../../../../users/infrastructure/persistence/relational/mappers/user.mapper';
 
 import { ContentReportEntity } from '../entities/content-report.entity';
+import { ContentMapper } from '../../../../../contents/infrastructure/persistence/relational/mappers/content.mapper';
 
 export class ContentReportMapper {
   static toDomain(raw: ContentReportEntity): ContentReport {
@@ -16,7 +16,7 @@ export class ContentReportMapper {
     domainEntity.reason = raw.reason;
 
     if (raw.contentId) {
-      domainEntity.contentId = FileMapper.toDomain(raw.contentId);
+      domainEntity.contentId = ContentMapper.toDomain(raw.contentId);
     }
 
     if (raw.reporterId) {
@@ -41,7 +41,7 @@ export class ContentReportMapper {
     persistenceEntity.reason = domainEntity.reason;
 
     if (domainEntity.contentId) {
-      persistenceEntity.contentId = FileMapper.toPersistence(
+      persistenceEntity.contentId = ContentMapper.toPersistence(
         domainEntity.contentId,
       );
     }

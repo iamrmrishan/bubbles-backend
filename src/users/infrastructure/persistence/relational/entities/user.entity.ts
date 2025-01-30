@@ -34,6 +34,7 @@ export class UserEntity extends EntityRelationalHelper {
   @Column({
     nullable: false,
     type: Boolean,
+    default: false,
   })
   isCreator?: boolean;
 

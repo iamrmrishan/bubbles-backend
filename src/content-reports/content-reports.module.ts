@@ -1,13 +1,13 @@
-import { FilesModule } from '../files/files.module';
 import { UsersModule } from '../users/users.module';
 import { Module } from '@nestjs/common';
 import { ContentReportsService } from './content-reports.service';
 import { ContentReportsController } from './content-reports.controller';
 import { RelationalContentReportPersistenceModule } from './infrastructure/persistence/relational/relational-persistence.module';
+import { ContentsModule } from '../contents/contents.module';
 
 @Module({
   imports: [
-    FilesModule,
+    ContentsModule,
 
     UsersModule,
 

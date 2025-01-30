@@ -1,5 +1,3 @@
-import { FileDto } from '../../files/dto/file.dto';
-
 import { UserDto } from '../../users/dto/user.dto';
 
 import {
@@ -20,6 +18,7 @@ import {
   // decorators here
   ApiProperty,
 } from '@nestjs/swagger';
+import { ContentDto } from '../../contents/dto/content.dto';
 
 export class CreateContentReportDto {
   @ApiProperty({
@@ -48,12 +47,12 @@ export class CreateContentReportDto {
 
   @ApiProperty({
     required: true,
-    type: () => FileDto,
+    type: () => ContentDto,
   })
   @ValidateNested()
-  @Type(() => FileDto)
+  @Type(() => ContentDto)
   @IsNotEmptyObject()
-  contentId: FileDto;
+  contentId: ContentDto;
 
   @ApiProperty({
     required: false,

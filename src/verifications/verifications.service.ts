@@ -1,3 +1,6 @@
+import { FilesService } from '../files/files.service';
+import { FileType } from '../files/domain/file';
+
 import { UsersService } from '../users/users.service';
 import { User } from '../users/domain/user';
 
@@ -13,6 +16,8 @@ import { Verifications } from './domain/verifications';
 @Injectable()
 export class VerificationsService {
   constructor(
+    private readonly fileService: FilesService,
+
     private readonly userService: UsersService,
 
     // Dependencies here
@@ -22,6 +27,33 @@ export class VerificationsService {
   async create(createVerificationsDto: CreateVerificationsDto) {
     // Do not remove comment below.
     // <creating-property />
+
+    const selfieWithIdObject = await this.fileService.findById(
+      createVerificationsDto.selfieWithId.id,
+    );
+    if (!selfieWithIdObject) {
+      throw new UnprocessableEntityException({
+        status: HttpStatus.UNPROCESSABLE_ENTITY,
+        errors: {
+          selfieWithId: 'notExists',
+        },
+      });
+    }
+    const selfieWithId = selfieWithIdObject;
+
+    const idDocumentObject = await this.fileService.findById(
+      createVerificationsDto.idDocument.id,
+    );
+    if (!idDocumentObject) {
+      throw new UnprocessableEntityException({
+        status: HttpStatus.UNPROCESSABLE_ENTITY,
+        errors: {
+          idDocument: 'notExists',
+        },
+      });
+    }
+    const idDocument = idDocumentObject;
+
     const userObject = await this.userService.findById(
       createVerificationsDto.user.id.toString(),
     );
@@ -38,6 +70,30 @@ export class VerificationsService {
     return this.verificationsRepository.create({
       // Do not remove comment below.
       // <creating-property-payload />
+      verifiedBy: createVerificationsDto.verifiedBy,
+
+      verifiedAt: createVerificationsDto.verifiedAt,
+
+      isVerified: createVerificationsDto.isVerified,
+
+      rejectionReason: createVerificationsDto.rejectionReason,
+
+      status: createVerificationsDto.status,
+
+      selfieWithId,
+
+      idDocument,
+
+      address: createVerificationsDto.address,
+
+      state: createVerificationsDto.state,
+
+      country: createVerificationsDto.country,
+
+      dateOfBirth: createVerificationsDto.dateOfBirth,
+
+      fullName: createVerificationsDto.fullName,
+
       user,
     });
   }
@@ -70,6 +126,41 @@ export class VerificationsService {
   ) {
     // Do not remove comment below.
     // <updating-property />
+
+    let selfieWithId: FileType | undefined = undefined;
+
+    if (updateVerificationsDto.selfieWithId) {
+      const selfieWithIdObject = await this.fileService.findById(
+        updateVerificationsDto.selfieWithId.id,
+      );
+      if (!selfieWithIdObject) {
+        throw new UnprocessableEntityException({
+          status: HttpStatus.UNPROCESSABLE_ENTITY,
+          errors: {
+            selfieWithId: 'notExists',
+          },
+        });
+      }
+      selfieWithId = selfieWithIdObject;
+    }
+
+    let idDocument: FileType | undefined = undefined;
+
+    if (updateVerificationsDto.idDocument) {
+      const idDocumentObject = await this.fileService.findById(
+        updateVerificationsDto.idDocument.id,
+      );
+      if (!idDocumentObject) {
+        throw new UnprocessableEntityException({
+          status: HttpStatus.UNPROCESSABLE_ENTITY,
+          errors: {
+            idDocument: 'notExists',
+          },
+        });
+      }
+      idDocument = idDocumentObject;
+    }
+
     let user: User | undefined = undefined;
 
     if (updateVerificationsDto.user) {
@@ -90,6 +181,30 @@ export class VerificationsService {
     return this.verificationsRepository.update(id, {
       // Do not remove comment below.
       // <updating-property-payload />
+      verifiedBy: updateVerificationsDto.verifiedBy,
+
+      verifiedAt: updateVerificationsDto.verifiedAt,
+
+      isVerified: updateVerificationsDto.isVerified,
+
+      rejectionReason: updateVerificationsDto.rejectionReason,
+
+      status: updateVerificationsDto.status,
+
+      selfieWithId,
+
+      idDocument,
+
+      address: updateVerificationsDto.address,
+
+      state: updateVerificationsDto.state,
+
+      country: updateVerificationsDto.country,
+
+      dateOfBirth: updateVerificationsDto.dateOfBirth,
+
+      fullName: updateVerificationsDto.fullName,
+
       user,
     });
   }

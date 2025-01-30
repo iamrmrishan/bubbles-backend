@@ -1,5 +1,4 @@
-import { FilesService } from '../files/files.service';
-import { FileType } from '../files/domain/file';
+
 
 import { UsersService } from '../users/users.service';
 import { User } from '../users/domain/user';
@@ -12,11 +11,13 @@ import { UpdateContentReportDto } from './dto/update-content-report.dto';
 import { ContentReportRepository } from './infrastructure/persistence/content-report.repository';
 import { IPaginationOptions } from '../utils/types/pagination-options';
 import { ContentReport } from './domain/content-report';
+import { ContentsService } from '../contents/contents.service';
+import { Content } from '../contents/domain/content';
 
 @Injectable()
 export class ContentReportsService {
   constructor(
-    private readonly fileService: FilesService,
+    private readonly contentsService: ContentsService,
 
     private readonly userService: UsersService,
 
@@ -28,8 +29,8 @@ export class ContentReportsService {
     // Do not remove comment below.
     // <creating-property />
 
-    let contentId: FileType | undefined = undefined;
-    const contentIdObject = await this.fileService.findById(
+    let contentId: Content | undefined = undefined;
+    const contentIdObject = await this.contentsService.findById(
       createContentReportDto.contentId.id,
     );
     if (!contentIdObject) {
@@ -120,10 +121,10 @@ export class ContentReportsService {
     // Do not remove comment below.
     // <updating-property />
 
-    let contentId: FileType | undefined = undefined;
+    let contentId: Content | undefined = undefined;
 
     if (updateContentReportDto.contentId) {
-      const contentIdObject = await this.fileService.findById(
+      const contentIdObject = await this.contentsService.findById(
         updateContentReportDto.contentId.id,
       );
       if (!contentIdObject) {
@@ -138,7 +139,7 @@ export class ContentReportsService {
     }
 
     if (updateContentReportDto.contentId) {
-      const contentIdObject = await this.fileService.findById(
+      const contentIdObject = await this.contentsService.findById(
         updateContentReportDto.contentId.id,
       );
       if (!contentIdObject) {
