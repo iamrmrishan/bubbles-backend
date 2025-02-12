@@ -36,5 +36,7 @@ export abstract class UserRepository {
     payload: DeepPartial<User>,
   ): Promise<User | null>;
 
+  abstract findByUsername(username: string): Promise<NullableType<User>>;
+
   abstract remove(id: User['id']): Promise<void>;
 }

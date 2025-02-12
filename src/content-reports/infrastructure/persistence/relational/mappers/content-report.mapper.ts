@@ -1,6 +1,5 @@
 import { ContentReport } from '../../../../domain/content-report';
 
-
 import { UserMapper } from '../../../../../users/infrastructure/persistence/relational/mappers/user.mapper';
 
 import { ContentReportEntity } from '../entities/content-report.entity';

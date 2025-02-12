@@ -28,6 +28,7 @@ import { Session } from '../session/domain/session';
 import { SessionService } from '../session/session.service';
 import { StatusEnum } from '../statuses/statuses.enum';
 import { User } from '../users/domain/user';
+import { generateUsername } from '../utils/generators/username-generator';
 
 @Injectable()
 export class AuthService {
@@ -144,8 +145,6 @@ export class AuthService {
 
       user = await this.usersService.create({
         email: socialEmail ?? null,
-        firstName: socialData.firstName ?? null,
-        lastName: socialData.lastName ?? null,
         socialId: socialData.id,
         provider: authProvider,
         role,
@@ -194,6 +193,21 @@ export class AuthService {
   }
 
   async register(dto: AuthRegisterLoginDto): Promise<void> {
+    let username: string;
+    let attempts = 0;
+    const maxAttempts = 5;
+
+    do {
+      username = generateUsername();
+      const existingUser = await this.usersService.findByUsername(username);
+      if (!existingUser) break;
+      attempts++;
+    } while (attempts < maxAttempts);
+
+    if (attempts === maxAttempts) {
+      const extraNumbers = Math.floor(Math.random() * 90000) + 10000;
+      username = username + extraNumbers;
+    }
     const user = await this.usersService.create({
       ...dto,
       email: dto.email,
@@ -203,6 +217,12 @@ export class AuthService {
       status: {
         id: StatusEnum.inactive,
       },
+      userName: username,
+      isCreator: false,
+      bio: null,
+      coverPhoto: null,
+      photo: null,
+      provider: AuthProvidersEnum.email,
     });
 
     const hash = await this.jwtService.signAsync(

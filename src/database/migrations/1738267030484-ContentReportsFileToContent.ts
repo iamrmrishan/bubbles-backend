@@ -10,7 +10,7 @@ export class ContentReportsFileToContent1738267030484
     await queryRunner.query(
       `ALTER TABLE "content_report" DROP CONSTRAINT "FK_8bdbe06ab1065c4000018993516"`,
     );
-    
+
     // Rename the column
     await queryRunner.query(
       `ALTER TABLE "content_report" RENAME COLUMN "contentIdId" TO "contentId"`,

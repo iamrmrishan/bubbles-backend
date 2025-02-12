@@ -143,9 +143,6 @@ export class UsersService {
       isCreator: createUserDto.isCreator,
 
       userName: createUserDto.userName,
-
-      firstName: createUserDto.firstName,
-      lastName: createUserDto.lastName,
       email: email,
       password: password,
       photo: photo,
@@ -323,9 +320,6 @@ export class UsersService {
       isCreator: updateUserDto.isCreator,
 
       userName: updateUserDto.userName,
-
-      firstName: updateUserDto.firstName,
-      lastName: updateUserDto.lastName,
       email,
       password,
       photo,
@@ -334,6 +328,10 @@ export class UsersService {
       provider: updateUserDto.provider,
       socialId: updateUserDto.socialId,
     });
+  }
+
+  async findByUsername(username: string): Promise<NullableType<User>> {
+    return this.usersRepository.findByUsername(username);
   }
 
   async remove(id: User['id']): Promise<void> {
