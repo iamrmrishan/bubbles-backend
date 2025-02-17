@@ -1,4 +1,4 @@
-import { SubscriptionPlansEntity } from '../../../../../subscription-plans/infrastructure/persistence/relational/entities/subscription-plans.entity';
+import { SubscriptionPlanEntity } from '../../../../../subscription-plans/infrastructure/persistence/relational/entities/subscription-plans.entity';
 
 import { UserEntity } from '../../../../../users/infrastructure/persistence/relational/entities/user.entity';
 
@@ -22,8 +22,8 @@ export class MessagesEntity extends EntityRelationalHelper {
   })
   sentAt: string;
 
-  @ManyToOne(() => SubscriptionPlansEntity, { eager: true, nullable: false })
-  plan: SubscriptionPlansEntity;
+  @ManyToOne(() => SubscriptionPlanEntity, { eager: true, nullable: false })
+  plan: SubscriptionPlanEntity;
 
   @Column({
     nullable: false,

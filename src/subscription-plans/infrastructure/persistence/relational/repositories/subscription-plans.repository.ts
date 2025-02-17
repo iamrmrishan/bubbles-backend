@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
-import { SubscriptionPlansEntity } from '../entities/subscription-plans.entity';
+import { Repository, In, FindManyOptions } from 'typeorm';
+import { SubscriptionPlanEntity } from '../entities/subscription-plans.entity';
 import { NullableType } from '../../../../../utils/types/nullable.type';
-import { SubscriptionPlans } from '../../../../domain/subscription-plans';
+import { SubscriptionPlan } from '../../../../domain/subscription-plans';
 import { SubscriptionPlansRepository } from '../../subscription-plans.repository';
-import { SubscriptionPlansMapper } from '../mappers/subscription-plans.mapper';
+import { SubscriptionPlanMapper } from '../mappers/subscription-plans.mapper';
 import { IPaginationOptions } from '../../../../../utils/types/pagination-options';
 
 @Injectable()
@@ -13,55 +13,74 @@ export class SubscriptionPlansRelationalRepository
   implements SubscriptionPlansRepository
 {
   constructor(
-    @InjectRepository(SubscriptionPlansEntity)
-    private readonly subscriptionPlansRepository: Repository<SubscriptionPlansEntity>,
+    @InjectRepository(SubscriptionPlanEntity)
+    private readonly subscriptionPlansRepository: Repository<SubscriptionPlanEntity>,
   ) {}
 
-  async create(data: SubscriptionPlans): Promise<SubscriptionPlans> {
-    const persistenceModel = SubscriptionPlansMapper.toPersistence(data);
+  async create(data: SubscriptionPlan): Promise<SubscriptionPlan> {
+    const persistenceModel = SubscriptionPlanMapper.toPersistence(data);
+
     const newEntity = await this.subscriptionPlansRepository.save(
-      this.subscriptionPlansRepository.create(persistenceModel),
+      this.subscriptionPlansRepository.create({
+        name: persistenceModel.name,
+        description: persistenceModel.description,
+        price: persistenceModel.price,
+        duration: persistenceModel.duration,
+        stripeProductId: persistenceModel.stripeProductId,
+        stripePriceId: persistenceModel.stripePriceId,
+        creatorId: persistenceModel.creatorId,
+      }),
     );
-    return SubscriptionPlansMapper.toDomain(newEntity);
+
+    return SubscriptionPlanMapper.toDomain(newEntity);
   }
 
   async findAllWithPagination({
     paginationOptions,
   }: {
     paginationOptions: IPaginationOptions;
-  }): Promise<SubscriptionPlans[]> {
+  }): Promise<SubscriptionPlan[]> {
     const entities = await this.subscriptionPlansRepository.find({
       skip: (paginationOptions.page - 1) * paginationOptions.limit,
       take: paginationOptions.limit,
     });
 
-    return entities.map((entity) => SubscriptionPlansMapper.toDomain(entity));
+    return entities.map((entity) => SubscriptionPlanMapper.toDomain(entity));
+  }
+
+  async find(options: FindManyOptions): Promise<SubscriptionPlan[]> {
+    const entities = await this.subscriptionPlansRepository.find({
+      where: options.where,
+      order: options.order,
+      take: options.take,
+      skip: options.skip,
+    });
+
+    return entities.map((entity) => SubscriptionPlanMapper.toDomain(entity));
   }
 
   async findById(
-    id: SubscriptionPlans['id'],
-  ): Promise<NullableType<SubscriptionPlans>> {
+    id: SubscriptionPlan['id'],
+  ): Promise<NullableType<SubscriptionPlan>> {
     const entity = await this.subscriptionPlansRepository.findOne({
       where: { id },
     });
 
-    return entity ? SubscriptionPlansMapper.toDomain(entity) : null;
+    return entity ? SubscriptionPlanMapper.toDomain(entity) : null;
   }
 
-  async findByIds(
-    ids: SubscriptionPlans['id'][],
-  ): Promise<SubscriptionPlans[]> {
+  async findByIds(ids: SubscriptionPlan['id'][]): Promise<SubscriptionPlan[]> {
     const entities = await this.subscriptionPlansRepository.find({
       where: { id: In(ids) },
     });
 
-    return entities.map((entity) => SubscriptionPlansMapper.toDomain(entity));
+    return entities.map((entity) => SubscriptionPlanMapper.toDomain(entity));
   }
 
   async update(
-    id: SubscriptionPlans['id'],
-    payload: Partial<SubscriptionPlans>,
-  ): Promise<SubscriptionPlans> {
+    id: SubscriptionPlan['id'],
+    payload: Partial<SubscriptionPlan>,
+  ): Promise<SubscriptionPlan> {
     const entity = await this.subscriptionPlansRepository.findOne({
       where: { id },
     });
@@ -72,17 +91,17 @@ export class SubscriptionPlansRelationalRepository
 
     const updatedEntity = await this.subscriptionPlansRepository.save(
       this.subscriptionPlansRepository.create(
-        SubscriptionPlansMapper.toPersistence({
-          ...SubscriptionPlansMapper.toDomain(entity),
+        SubscriptionPlanMapper.toPersistence({
+          ...SubscriptionPlanMapper.toDomain(entity),
           ...payload,
         }),
       ),
     );
 
-    return SubscriptionPlansMapper.toDomain(updatedEntity);
+    return SubscriptionPlanMapper.toDomain(updatedEntity);
   }
 
-  async remove(id: SubscriptionPlans['id']): Promise<void> {
+  async remove(id: SubscriptionPlan['id']): Promise<void> {
     await this.subscriptionPlansRepository.delete(id);
   }
 }

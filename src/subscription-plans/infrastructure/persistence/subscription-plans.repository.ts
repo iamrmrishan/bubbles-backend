@@ -1,31 +1,34 @@
+import { FindManyOptions } from 'typeorm';
 import { DeepPartial } from '../../../utils/types/deep-partial.type';
 import { NullableType } from '../../../utils/types/nullable.type';
 import { IPaginationOptions } from '../../../utils/types/pagination-options';
-import { SubscriptionPlans } from '../../domain/subscription-plans';
+import { SubscriptionPlan } from '../../domain/subscription-plans';
 
 export abstract class SubscriptionPlansRepository {
   abstract create(
-    data: Omit<SubscriptionPlans, 'id' | 'createdAt' | 'updatedAt'>,
-  ): Promise<SubscriptionPlans>;
+    data: Omit<SubscriptionPlan, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<SubscriptionPlan>;
 
   abstract findAllWithPagination({
     paginationOptions,
   }: {
     paginationOptions: IPaginationOptions;
-  }): Promise<SubscriptionPlans[]>;
+  }): Promise<SubscriptionPlan[]>;
+
+  abstract find(options: FindManyOptions): Promise<SubscriptionPlan[]>;
 
   abstract findById(
-    id: SubscriptionPlans['id'],
-  ): Promise<NullableType<SubscriptionPlans>>;
+    id: SubscriptionPlan['id'],
+  ): Promise<NullableType<SubscriptionPlan>>;
 
   abstract findByIds(
-    ids: SubscriptionPlans['id'][],
-  ): Promise<SubscriptionPlans[]>;
+    ids: SubscriptionPlan['id'][],
+  ): Promise<SubscriptionPlan[]>;
 
   abstract update(
-    id: SubscriptionPlans['id'],
-    payload: DeepPartial<SubscriptionPlans>,
-  ): Promise<SubscriptionPlans | null>;
+    id: SubscriptionPlan['id'],
+    payload: DeepPartial<SubscriptionPlan>,
+  ): Promise<SubscriptionPlan | null>;
 
-  abstract remove(id: SubscriptionPlans['id']): Promise<void>;
+  abstract remove(id: SubscriptionPlan['id']): Promise<void>;
 }

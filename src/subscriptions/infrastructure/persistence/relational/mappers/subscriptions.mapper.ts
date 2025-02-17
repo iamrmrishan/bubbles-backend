@@ -1,61 +1,48 @@
-import { Subscriptions } from '../../../../domain/subscriptions';
-
-import { SubscriptionPlansMapper } from '../../../../../subscription-plans/infrastructure/persistence/relational/mappers/subscription-plans.mapper';
-
+import { Subscription } from '../../../../domain/subscriptions';
+import { SubscriptionEntity } from '../entities/subscriptions.entity';
 import { UserMapper } from '../../../../../users/infrastructure/persistence/relational/mappers/user.mapper';
+import { SubscriptionPlanMapper } from '../../../../../subscription-plans/infrastructure/persistence/relational/mappers/subscription-plans.mapper';
 
-import { SubscriptionsEntity } from '../entities/subscriptions.entity';
-
-export class SubscriptionsMapper {
-  static toDomain(raw: SubscriptionsEntity): Subscriptions {
-    const domainEntity = new Subscriptions();
-    domainEntity.endDate = raw.endDate;
-
-    domainEntity.startDate = raw.startDate;
-
-    domainEntity.status = raw.status;
-
-    if (raw.plan) {
-      domainEntity.plan = SubscriptionPlansMapper.toDomain(raw.plan);
-    }
-
+export class SubscriptionMapper {
+  static toDomain(raw: SubscriptionEntity): Subscription {
+    const subscription = new Subscription();
+    subscription.id = raw.id;
     if (raw.subscriber) {
-      domainEntity.subscriber = UserMapper.toDomain(raw.subscriber);
+      subscription.subscriber = UserMapper.toDomain(raw.subscriber);
     }
-
-    domainEntity.id = raw.id;
-    domainEntity.createdAt = raw.createdAt;
-    domainEntity.updatedAt = raw.updatedAt;
-
-    return domainEntity;
+    if (raw.plan) {
+      subscription.plan = SubscriptionPlanMapper.toDomain(raw.plan);
+    }
+    subscription.stripeSubscriptionId = raw.stripeSubscriptionId;
+    subscription.startDate = raw.startDate;
+    subscription.endDate = raw.endDate;
+    subscription.status = raw.status;
+    subscription.createdAt = raw.createdAt;
+    subscription.updatedAt = raw.updatedAt;
+    return subscription;
   }
 
-  static toPersistence(domainEntity: Subscriptions): SubscriptionsEntity {
-    const persistenceEntity = new SubscriptionsEntity();
-    persistenceEntity.endDate = domainEntity.endDate;
-
-    persistenceEntity.startDate = domainEntity.startDate;
-
-    persistenceEntity.status = domainEntity.status;
-
-    if (domainEntity.plan) {
-      persistenceEntity.plan = SubscriptionPlansMapper.toPersistence(
-        domainEntity.plan,
-      );
+  static toPersistence(domain: Subscription): SubscriptionEntity {
+    const entity = new SubscriptionEntity();
+    if (domain.id) {
+      entity.id = domain.id;
     }
-
-    if (domainEntity.subscriber) {
-      persistenceEntity.subscriber = UserMapper.toPersistence(
-        domainEntity.subscriber,
-      );
+    if (domain.subscriber) {
+      entity.subscriber = UserMapper.toPersistence(domain.subscriber);
     }
-
-    if (domainEntity.id) {
-      persistenceEntity.id = domainEntity.id;
+    if (domain.plan) {
+      entity.plan = SubscriptionPlanMapper.toPersistence(domain.plan);
     }
-    persistenceEntity.createdAt = domainEntity.createdAt;
-    persistenceEntity.updatedAt = domainEntity.updatedAt;
-
-    return persistenceEntity;
+    entity.stripeSubscriptionId = domain.stripeSubscriptionId;
+    entity.startDate = domain.startDate;
+    entity.endDate = domain.endDate;
+    entity.status = domain.status;
+    if (domain.createdAt) {
+      entity.createdAt = domain.createdAt;
+    }
+    if (domain.updatedAt) {
+      entity.updatedAt = domain.updatedAt;
+    }
+    return entity;
   }
 }

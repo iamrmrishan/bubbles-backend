@@ -1,6 +1,6 @@
 import { Messages } from '../../../../domain/messages';
 
-import { SubscriptionPlansMapper } from '../../../../../subscription-plans/infrastructure/persistence/relational/mappers/subscription-plans.mapper';
+import { SubscriptionPlanMapper } from '../../../../../subscription-plans/infrastructure/persistence/relational/mappers/subscription-plans.mapper';
 
 import { UserMapper } from '../../../../../users/infrastructure/persistence/relational/mappers/user.mapper';
 
@@ -12,7 +12,7 @@ export class MessagesMapper {
     domainEntity.sentAt = raw.sentAt;
 
     if (raw.plan) {
-      domainEntity.plan = SubscriptionPlansMapper.toDomain(raw.plan);
+      domainEntity.plan = SubscriptionPlanMapper.toDomain(raw.plan);
     }
 
     domainEntity.MessageContent = raw.MessageContent;
@@ -37,7 +37,7 @@ export class MessagesMapper {
     persistenceEntity.sentAt = domainEntity.sentAt;
 
     if (domainEntity.plan) {
-      persistenceEntity.plan = SubscriptionPlansMapper.toPersistence(
+      persistenceEntity.plan = SubscriptionPlanMapper.toPersistence(
         domainEntity.plan,
       );
     }

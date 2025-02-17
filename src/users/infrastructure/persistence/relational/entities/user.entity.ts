@@ -16,6 +16,7 @@ import { FileEntity } from '../../../../../files/infrastructure/persistence/rela
 
 import { AuthProvidersEnum } from '../../../../../auth/auth-providers.enum';
 import { EntityRelationalHelper } from '../../../../../utils/relational-entity-helper';
+import { WalletEntity } from '../../../../../wallets/infrastructure/persistence/relational/entities/wallet.entity';
 
 @Entity({
   name: 'user',
@@ -77,6 +78,10 @@ export class UserEntity extends EntityRelationalHelper {
     eager: true,
   })
   status?: StatusEntity;
+
+  @OneToOne(() => WalletEntity, { eager: true })
+  @JoinColumn()
+  wallet?: WalletEntity;
 
   @CreateDateColumn()
   createdAt: Date;

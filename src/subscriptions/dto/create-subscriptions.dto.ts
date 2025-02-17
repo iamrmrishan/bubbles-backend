@@ -13,6 +13,7 @@ import {
   ValidateNested,
   IsNotEmptyObject,
   IsString,
+  IsNotEmpty,
 } from 'class-validator';
 
 import {
@@ -59,6 +60,11 @@ export class CreateSubscriptionsDto {
   @Type(() => UserDto)
   @IsNotEmptyObject()
   subscriber: UserDto;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  stripeSubscriptionId: string;
 
   // Don't forget to use the class-validator decorators in the DTO properties.
 }

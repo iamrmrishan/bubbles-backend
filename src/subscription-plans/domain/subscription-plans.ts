@@ -1,41 +1,33 @@
-import { User } from '../../users/domain/user';
 import { ApiProperty } from '@nestjs/swagger';
+import { User } from '../../users/domain/user';
 
-export class SubscriptionPlans {
-  @ApiProperty({
-    type: () => Number,
-    nullable: false,
-  })
-  duration: number;
+export class SubscriptionPlan {
+  @ApiProperty({ type: String })
+  id: string;
 
-  @ApiProperty({
-    type: () => Number,
-    nullable: false,
-  })
-  price: number;
-
-  @ApiProperty({
-    type: () => String,
-    nullable: false,
-  })
-  description: string;
-
-  @ApiProperty({
-    type: () => String,
-    nullable: false,
-  })
+  @ApiProperty({ type: String })
   name: string;
 
-  @ApiProperty({
-    type: () => User,
-    nullable: false,
-  })
-  user: User;
+  @ApiProperty({ type: String })
+  description: string;
 
-  @ApiProperty({
-    type: String,
-  })
-  id: string;
+  @ApiProperty({ type: Number })
+  price: number;
+
+  @ApiProperty({ type: Number })
+  duration: number; // in months
+
+  @ApiProperty({ type: String })
+  creatorId: string;
+
+  @ApiProperty({ type: () => User })
+  creator: User;
+
+  @ApiProperty({ type: String })
+  stripeProductId: string;
+
+  @ApiProperty({ type: String })
+  stripePriceId: string;
 
   @ApiProperty()
   createdAt: Date;

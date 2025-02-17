@@ -1,4 +1,4 @@
-import { SubscriptionPlans } from '../../subscription-plans/domain/subscription-plans';
+import { SubscriptionPlan } from '../../subscription-plans/domain/subscription-plans';
 import { User } from '../../users/domain/user';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -10,10 +10,10 @@ export class Messages {
   sentAt: string;
 
   @ApiProperty({
-    type: () => SubscriptionPlans,
+    type: () => SubscriptionPlan,
     nullable: false,
   })
-  plan: SubscriptionPlans;
+  plan: SubscriptionPlan;
 
   @ApiProperty({
     type: () => String,

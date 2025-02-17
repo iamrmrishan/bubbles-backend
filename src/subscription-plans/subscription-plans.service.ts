@@ -1,118 +1,237 @@
-import { UsersService } from '../users/users.service';
-import { User } from '../users/domain/user';
-
-import { HttpStatus, UnprocessableEntityException } from '@nestjs/common';
-
-import { Injectable } from '@nestjs/common';
-import { CreateSubscriptionPlansDto } from './dto/create-subscription-plans.dto';
-import { UpdateSubscriptionPlansDto } from './dto/update-subscription-plans.dto';
+import {
+  Injectable,
+  HttpStatus,
+  UnprocessableEntityException,
+} from '@nestjs/common';
+import { CreateSubscriptionPlanDto } from './dto/create-subscription-plans.dto';
 import { SubscriptionPlansRepository } from './infrastructure/persistence/subscription-plans.repository';
-import { IPaginationOptions } from '../utils/types/pagination-options';
-import { SubscriptionPlans } from './domain/subscription-plans';
+import { UsersService } from '../users/users.service';
+import { StripeService } from '../stripes/stripes.service';
+import { UpdateSubscriptionPlansDto } from './dto/update-subscription-plans.dto';
+import { SubscriptionsService } from '../subscriptions/subscriptions.service';
+import { SubscriptionStatus } from '../subscriptions/domain/subscriptions';
+import { DeepPartial } from 'typeorm';
+import { SubscriptionPlan } from './domain/subscription-plans';
 
 @Injectable()
 export class SubscriptionPlansService {
   constructor(
-    private readonly userService: UsersService,
-
-    // Dependencies here
-    private readonly subscriptionPlansRepository: SubscriptionPlansRepository,
+    private readonly subscriptionPlanRepository: SubscriptionPlansRepository,
+    private readonly usersService: UsersService,
+    private readonly subscriptionsService: SubscriptionsService,
+    private readonly stripeService: StripeService,
   ) {}
 
-  async create(createSubscriptionPlansDto: CreateSubscriptionPlansDto) {
-    // Do not remove comment below.
-    // <creating-property />
-
-    const userObject = await this.userService.findById(
-      createSubscriptionPlansDto.user.id.toString(),
+  async create(createDto: CreateSubscriptionPlanDto) {
+    // Verify creator exists and is actually a creator
+    const creator = await this.usersService.findById(
+      createDto.creator.id.toString(),
     );
-    if (!userObject) {
+    // Log the found creator
+    console.log('Found creator:', creator);
+    if (!creator) {
       throw new UnprocessableEntityException({
         status: HttpStatus.UNPROCESSABLE_ENTITY,
-        errors: {
-          user: 'notExists',
-        },
+        errors: { creator: 'creatorNotFound' },
       });
     }
-    const user = userObject;
 
-    return this.subscriptionPlansRepository.create({
-      // Do not remove comment below.
-      // <creating-property-payload />
-      duration: createSubscriptionPlansDto.duration,
+    if (!creator.isCreator) {
+      throw new UnprocessableEntityException({
+        status: HttpStatus.UNPROCESSABLE_ENTITY,
+        errors: { creator: 'userIsNotCreator' },
+      });
+    }
 
-      price: createSubscriptionPlansDto.price,
+    // Create Stripe product and price
+    const { productId, priceId } =
+      await this.stripeService.createSubscriptionProduct({
+        name: createDto.name,
+        description: createDto.description,
+        amount: createDto.price,
+        interval: 'month',
+        intervalCount: createDto.duration,
+      });
 
-      description: createSubscriptionPlansDto.description,
+    // Log what we're passing to repository create
+    const createData = {
+      ...createDto,
+      creator,
+      stripeProductId: productId,
+      stripePriceId: priceId,
+    };
+    // console.log('Data being passed to repository create:', createData);
 
-      name: createSubscriptionPlansDto.name,
-
-      user,
+    // Create subscription plan
+    return this.subscriptionPlanRepository.create({
+      ...createDto,
+      creator: creator,
+      stripeProductId: productId,
+      stripePriceId: priceId,
+      creatorId: creator.id,
     });
   }
 
-  findAllWithPagination({
-    paginationOptions,
-  }: {
-    paginationOptions: IPaginationOptions;
-  }) {
-    return this.subscriptionPlansRepository.findAllWithPagination({
-      paginationOptions: {
-        page: paginationOptions.page,
-        limit: paginationOptions.limit,
+  async findById(id: string) {
+    const plan = await this.subscriptionPlanRepository.findById(id);
+    if (!plan) {
+      throw new UnprocessableEntityException({
+        status: HttpStatus.UNPROCESSABLE_ENTITY,
+        errors: { plan: 'planNotFound' },
+      });
+    }
+    return plan;
+  }
+
+  async findByCreatorId(creatorId: string) {
+    return this.subscriptionPlanRepository.find({
+      where: { creator: { id: creatorId } },
+      order: {
+        createdAt: 'DESC',
       },
     });
   }
 
-  findById(id: SubscriptionPlans['id']) {
-    return this.subscriptionPlansRepository.findById(id);
-  }
+  async update(id: string, updateDto: UpdateSubscriptionPlansDto) {
+    const plan = await this.findById(id);
 
-  findByIds(ids: SubscriptionPlans['id'][]) {
-    return this.subscriptionPlansRepository.findByIds(ids);
-  }
+    // If price is being updated, create new Stripe price
+    if (updateDto.price && updateDto.price !== plan.price) {
+      const { priceId } = await this.stripeService.createSubscriptionPrice({
+        productId: plan.stripeProductId.toString(),
+        amount: updateDto.price,
+        interval: 'month',
+        intervalCount: updateDto.duration || plan.duration,
+      });
 
-  async update(
-    id: SubscriptionPlans['id'],
-
-    updateSubscriptionPlansDto: UpdateSubscriptionPlansDto,
-  ) {
-    // Do not remove comment below.
-    // <updating-property />
-
-    let user: User | undefined = undefined;
-
-    if (updateSubscriptionPlansDto.user) {
-      const userObject = await this.userService.findById(
-        updateSubscriptionPlansDto.user.id.toString(),
-      );
-      if (!userObject) {
-        throw new UnprocessableEntityException({
-          status: HttpStatus.UNPROCESSABLE_ENTITY,
-          errors: {
-            user: 'notExists',
-          },
-        });
-      }
-      user = userObject;
+      updateDto.stripePriceId = priceId;
     }
 
-    return this.subscriptionPlansRepository.update(id, {
-      // Do not remove comment below.
-      // <updating-property-payload />
-      duration: updateSubscriptionPlansDto.duration,
+    // // Convert DTO to DeepPartial<SubscriptionPlan>
+    // const updateData: DeepPartial<SubscriptionPlan> = {
+    //   name: updateDto.name,
+    //   description: updateDto.description,
+    //   price: updateDto.price,
+    //   duration: updateDto.duration,
+    //   stripePriceId: updateDto.stripePriceId,
+    //   stripeProductId: updateDto.stripeProductId,
+    //   creator: updateDto.creator ? {
+    //     id: String(updateDto.creator.id)
+    //   } : undefined
+    // };
 
-      price: updateSubscriptionPlansDto.price,
+    // Convert DTO to DeepPartial<SubscriptionPlan>
+    const updateData = this.toUpdateData(updateDto);
 
-      description: updateSubscriptionPlansDto.description,
+    return this.subscriptionPlanRepository.update(id, updateData);
+  }
 
-      name: updateSubscriptionPlansDto.name,
+  private toUpdateData(
+    updateDto: UpdateSubscriptionPlansDto,
+  ): DeepPartial<SubscriptionPlan> {
+    const updateData: DeepPartial<SubscriptionPlan> = {};
 
-      user,
+    // Only include properties that are defined in the DTO
+    if (updateDto.name !== undefined) {
+      updateData.name = updateDto.name;
+    }
+    if (updateDto.description !== undefined) {
+      updateData.description = updateDto.description;
+    }
+    if (updateDto.price !== undefined) {
+      updateData.price = updateDto.price;
+    }
+    if (updateDto.duration !== undefined) {
+      updateData.duration = updateDto.duration;
+    }
+    if (updateDto.stripePriceId !== undefined) {
+      updateData.stripePriceId = updateDto.stripePriceId;
+    }
+    if (updateDto.stripeProductId !== undefined) {
+      updateData.stripeProductId = updateDto.stripeProductId;
+    }
+    if (updateDto.creator !== undefined) {
+      updateData.creator = {
+        id: String(updateDto.creator.id),
+      };
+    }
+
+    return updateData;
+  }
+
+  async remove(id: string) {
+    const plan = await this.findById(id);
+
+    // Archive Stripe product
+    await this.stripeService.archiveProduct(plan.stripeProductId);
+
+    return this.subscriptionPlanRepository.remove(id);
+  }
+
+  async activateSubscription(
+    planId: string,
+    subscriberId: string,
+  ): Promise<void> {
+    const [plan, subscriber] = await Promise.all([
+      this.findById(planId),
+      this.usersService.findById(subscriberId),
+    ]);
+
+    if (!subscriber) {
+      throw new UnprocessableEntityException({
+        status: HttpStatus.UNPROCESSABLE_ENTITY,
+        errors: { subscriber: 'subscriberNotFound' },
+      });
+    }
+
+    // Calculate subscription dates
+    const startDate = new Date();
+    const endDate = new Date();
+    endDate.setMonth(endDate.getMonth() + plan.duration);
+
+    // Create Stripe subscription
+    const stripeSubscription = await this.stripeService.createSubscription({
+      customerId: subscriber?.wallet?.stripeCustomerId as string,
+      priceId: plan.stripePriceId,
+      paymentBehavior: 'default_incomplete',
+    });
+
+    // Create subscription record
+    await this.subscriptionsService.create({
+      subscriber: { id: subscriberId },
+      plan: { id: planId },
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+      status: SubscriptionStatus.ACTIVE,
+      stripeSubscriptionId: stripeSubscription.id,
     });
   }
 
-  remove(id: SubscriptionPlans['id']) {
-    return this.subscriptionPlansRepository.remove(id);
+  async cancelSubscription(
+    planId: string,
+    subscriberId: string,
+  ): Promise<void> {
+    const subscription =
+      await this.subscriptionsService.findByPlanAndSubscriber(
+        planId,
+        subscriberId,
+      );
+
+    if (!subscription) {
+      throw new UnprocessableEntityException({
+        status: HttpStatus.UNPROCESSABLE_ENTITY,
+        errors: { subscription: 'subscriptionNotFound' },
+      });
+    }
+
+    // Cancel Stripe subscription
+    await this.stripeService.cancelSubscription(
+      subscription.stripeSubscriptionId,
+    );
+
+    // Update subscription status
+    await this.subscriptionsService.update(subscription.id, {
+      status: SubscriptionStatus.CANCELED,
+    });
   }
 }

@@ -1,53 +1,48 @@
-import { SubscriptionPlans } from '../../../../domain/subscription-plans';
-
 import { UserMapper } from '../../../../../users/infrastructure/persistence/relational/mappers/user.mapper';
+import { SubscriptionPlan } from '../../../../domain/subscription-plans';
+import { SubscriptionPlanEntity } from '../entities/subscription-plans.entity';
 
-import { SubscriptionPlansEntity } from '../entities/subscription-plans.entity';
-
-export class SubscriptionPlansMapper {
-  static toDomain(raw: SubscriptionPlansEntity): SubscriptionPlans {
-    const domainEntity = new SubscriptionPlans();
-    domainEntity.duration = raw.duration;
-
-    domainEntity.price = raw.price;
-
-    domainEntity.description = raw.description;
-
-    domainEntity.name = raw.name;
-
-    if (raw.user) {
-      domainEntity.user = UserMapper.toDomain(raw.user);
+export class SubscriptionPlanMapper {
+  static toDomain(raw: SubscriptionPlanEntity): SubscriptionPlan {
+    const plan = new SubscriptionPlan();
+    plan.id = raw.id;
+    plan.name = raw.name;
+    plan.description = raw.description;
+    plan.price = Number(raw.price);
+    plan.duration = raw.duration;
+    plan.creatorId = raw.creatorId;
+    if (raw.creator) {
+      plan.creator = UserMapper.toDomain(raw.creator);
     }
-
-    domainEntity.id = raw.id;
-    domainEntity.createdAt = raw.createdAt;
-    domainEntity.updatedAt = raw.updatedAt;
-
-    return domainEntity;
+    plan.stripeProductId = raw.stripeProductId;
+    plan.stripePriceId = raw.stripePriceId;
+    plan.createdAt = raw.createdAt;
+    plan.updatedAt = raw.updatedAt;
+    return plan;
   }
 
-  static toPersistence(
-    domainEntity: SubscriptionPlans,
-  ): SubscriptionPlansEntity {
-    const persistenceEntity = new SubscriptionPlansEntity();
-    persistenceEntity.duration = domainEntity.duration;
-
-    persistenceEntity.price = domainEntity.price;
-
-    persistenceEntity.description = domainEntity.description;
-
-    persistenceEntity.name = domainEntity.name;
-
-    if (domainEntity.user) {
-      persistenceEntity.user = UserMapper.toPersistence(domainEntity.user);
+  static toPersistence(domain: SubscriptionPlan): SubscriptionPlanEntity {
+    const entity = new SubscriptionPlanEntity();
+    if (domain.id) {
+      entity.id = domain.id;
     }
-
-    if (domainEntity.id) {
-      persistenceEntity.id = domainEntity.id;
+    entity.name = domain.name;
+    entity.description = domain.description;
+    entity.price = domain.price;
+    entity.duration = domain.duration;
+    entity.creatorId = domain.creator.id;
+    if (domain.creator) {
+      const persistedCreator = UserMapper.toPersistence(domain.creator);
+      entity.creator = persistedCreator;
     }
-    persistenceEntity.createdAt = domainEntity.createdAt;
-    persistenceEntity.updatedAt = domainEntity.updatedAt;
-
-    return persistenceEntity;
+    entity.stripeProductId = domain.stripeProductId;
+    entity.stripePriceId = domain.stripePriceId;
+    if (domain.createdAt) {
+      entity.createdAt = domain.createdAt;
+    }
+    if (domain.updatedAt) {
+      entity.updatedAt = domain.updatedAt;
+    }
+    return entity;
   }
 }

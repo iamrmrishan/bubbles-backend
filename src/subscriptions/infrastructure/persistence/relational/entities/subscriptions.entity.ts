@@ -1,47 +1,42 @@
-import { SubscriptionPlansEntity } from '../../../../../subscription-plans/infrastructure/persistence/relational/entities/subscription-plans.entity';
-
-import { UserEntity } from '../../../../../users/infrastructure/persistence/relational/entities/user.entity';
-
 import {
-  CreateDateColumn,
-  Entity,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-  ManyToOne,
   Column,
+  Entity,
+  ManyToOne,
+  CreateDateColumn,
+  UpdateDateColumn,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
+import { UserEntity } from '../../../../../users/infrastructure/persistence/relational/entities/user.entity';
+import { SubscriptionPlanEntity } from '../../../../../subscription-plans/infrastructure/persistence/relational/entities/subscription-plans.entity';
 import { EntityRelationalHelper } from '../../../../../utils/relational-entity-helper';
+import { SubscriptionStatus } from '../../../../domain/subscriptions';
 
-@Entity({
-  name: 'subscriptions',
-})
-export class SubscriptionsEntity extends EntityRelationalHelper {
-  @Column({
-    nullable: false,
-    type: String,
-  })
+@Entity({ name: 'subscription' })
+export class SubscriptionEntity extends EntityRelationalHelper {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @ManyToOne(() => UserEntity)
+  subscriber: UserEntity;
+
+  @ManyToOne(() => SubscriptionPlanEntity)
+  plan: SubscriptionPlanEntity;
+
+  @Column()
+  stripeSubscriptionId: string;
+
+  @Column()
+  startDate: string;
+
+  @Column()
   endDate: string;
 
   @Column({
-    nullable: false,
-    type: String,
+    type: 'enum',
+    enum: SubscriptionStatus,
+    default: SubscriptionStatus.ACTIVE,
   })
-  startDate: string;
-
-  @Column({
-    nullable: false,
-    type: String,
-  })
-  status: string;
-
-  @ManyToOne(() => SubscriptionPlansEntity, { eager: true, nullable: false })
-  plan: SubscriptionPlansEntity;
-
-  @ManyToOne(() => UserEntity, { eager: true, nullable: false })
-  subscriber: UserEntity;
-
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  status: SubscriptionStatus;
 
   @CreateDateColumn()
   createdAt: Date;

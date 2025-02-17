@@ -3,6 +3,7 @@ import { FileType } from '../../files/domain/file';
 import { Role } from '../../roles/domain/role';
 import { Status } from '../../statuses/domain/status';
 import { ApiProperty } from '@nestjs/swagger';
+import { Wallet } from '../../wallets/domain/wallet';
 
 export class User {
   @ApiProperty({
@@ -73,6 +74,11 @@ export class User {
     type: () => Status,
   })
   status?: Status;
+
+  @ApiProperty({
+    type: () => Wallet,
+  })
+  wallet?: Wallet;
 
   @ApiProperty()
   createdAt: Date;

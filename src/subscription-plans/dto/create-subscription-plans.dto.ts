@@ -1,61 +1,49 @@
+import { ApiProperty } from '@nestjs/swagger';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+  ValidateNested,
+} from 'class-validator';
+import { Type } from 'class-transformer';
 import { UserDto } from '../../users/dto/user.dto';
 
-import {
-  // decorators here
-  Type,
-} from 'class-transformer';
-
-import {
-  // decorators here
-
-  ValidateNested,
-  IsNotEmptyObject,
-  IsString,
-  IsNumber,
-} from 'class-validator';
-
-import {
-  // decorators here
-  ApiProperty,
-} from '@nestjs/swagger';
-
-export class CreateSubscriptionPlansDto {
-  @ApiProperty({
-    required: true,
-    type: () => Number,
-  })
-  @IsNumber()
-  duration: number;
-
-  @ApiProperty({
-    required: true,
-    type: () => Number,
-  })
-  @IsNumber()
-  price: number;
-
-  @ApiProperty({
-    required: true,
-    type: () => String,
-  })
+export class CreateSubscriptionPlanDto {
+  @ApiProperty()
   @IsString()
-  description: string;
-
-  @ApiProperty({
-    required: true,
-    type: () => String,
-  })
-  @IsString()
+  @IsNotEmpty()
   name: string;
 
-  @ApiProperty({
-    required: true,
-    type: () => UserDto,
-  })
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  description: string;
+
+  @ApiProperty()
+  @IsNumber()
+  @Min(1)
+  price: number;
+
+  @ApiProperty()
+  @IsNumber()
+  @Min(1)
+  duration: number;
+
+  @ApiProperty({ type: () => UserDto })
   @ValidateNested()
   @Type(() => UserDto)
-  @IsNotEmptyObject()
-  user: UserDto;
+  @IsNotEmpty()
+  creator: UserDto;
 
-  // Don't forget to use the class-validator decorators in the DTO properties.
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  stripeProductId?: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  stripePriceId?: string;
 }

@@ -1,29 +1,42 @@
 import { DeepPartial } from '../../../utils/types/deep-partial.type';
 import { NullableType } from '../../../utils/types/nullable.type';
 import { IPaginationOptions } from '../../../utils/types/pagination-options';
-import { Subscriptions } from '../../domain/subscriptions';
+import { Subscription } from '../../domain/subscriptions';
+
+export interface FindOneConditions {
+  where: Record<string, any>;
+}
 
 export abstract class SubscriptionsRepository {
   abstract create(
-    data: Omit<Subscriptions, 'id' | 'createdAt' | 'updatedAt'>,
-  ): Promise<Subscriptions>;
+    data: Omit<Subscription, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<Subscription>;
 
   abstract findAllWithPagination({
     paginationOptions,
   }: {
     paginationOptions: IPaginationOptions;
-  }): Promise<Subscriptions[]>;
+  }): Promise<Subscription[]>;
 
   abstract findById(
-    id: Subscriptions['id'],
-  ): Promise<NullableType<Subscriptions>>;
+    id: Subscription['id'],
+  ): Promise<NullableType<Subscription>>;
 
-  abstract findByIds(ids: Subscriptions['id'][]): Promise<Subscriptions[]>;
+  abstract findByIds(ids: Subscription['id'][]): Promise<Subscription[]>;
 
   abstract update(
-    id: Subscriptions['id'],
-    payload: DeepPartial<Subscriptions>,
-  ): Promise<Subscriptions | null>;
+    id: Subscription['id'],
+    payload: DeepPartial<Subscription>,
+  ): Promise<Subscription | null>;
 
-  abstract remove(id: Subscriptions['id']): Promise<void>;
+  abstract findByPlanAndSubscriber(
+    planId: string,
+    subscriberId: string,
+  ): Promise<NullableType<Subscription>>;
+
+  abstract findOne(
+    conditions: FindOneConditions,
+  ): Promise<NullableType<Subscription>>;
+
+  abstract remove(id: Subscription['id']): Promise<void>;
 }

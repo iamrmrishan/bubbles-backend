@@ -1,5 +1,5 @@
 import { SubscriptionPlansService } from '../subscription-plans/subscription-plans.service';
-import { SubscriptionPlans } from '../subscription-plans/domain/subscription-plans';
+import { SubscriptionPlan } from '../subscription-plans/domain/subscription-plans';
 
 import { UsersService } from '../users/users.service';
 import { User } from '../users/domain/user';
@@ -111,7 +111,7 @@ export class MessagesService {
     // Do not remove comment below.
     // <updating-property />
 
-    let plan: SubscriptionPlans | undefined = undefined;
+    let plan: SubscriptionPlan | undefined = undefined;
 
     if (updateMessagesDto.plan) {
       const planObject = await this.subscriptionPlansService.findById(

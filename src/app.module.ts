@@ -50,8 +50,17 @@ import { MessagesModule } from './messages/messages.module';
 
 import { VerificationsModule } from './verifications/verifications.module';
 
+import { PaymentsModule } from './payments/payments.module';
+
+import { WalletsModule } from './wallets/wallets.module';
+
+import { StripeModule } from './stripes/stripes.module';
+
 @Module({
   imports: [
+    StripeModule,
+    WalletsModule,
+    PaymentsModule,
     VerificationsModule,
     MessagesModule,
     SubscriptionsModule,

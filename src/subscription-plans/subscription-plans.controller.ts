@@ -7,28 +7,22 @@ import {
   Param,
   Delete,
   UseGuards,
-  Query,
 } from '@nestjs/common';
-import { SubscriptionPlansService } from './subscription-plans.service';
-import { CreateSubscriptionPlansDto } from './dto/create-subscription-plans.dto';
-import { UpdateSubscriptionPlansDto } from './dto/update-subscription-plans.dto';
 import {
   ApiBearerAuth,
-  ApiCreatedResponse,
-  ApiOkResponse,
-  ApiParam,
   ApiTags,
+  ApiOperation,
+  ApiResponse,
 } from '@nestjs/swagger';
-import { SubscriptionPlans } from './domain/subscription-plans';
 import { AuthGuard } from '@nestjs/passport';
-import {
-  InfinityPaginationResponse,
-  InfinityPaginationResponseDto,
-} from '../utils/dto/infinity-pagination-response.dto';
-import { infinityPagination } from '../utils/infinity-pagination';
-import { FindAllSubscriptionPlansDto } from './dto/find-all-subscription-plans.dto';
+import { SubscriptionPlansService } from './subscription-plans.service';
+import { CreateSubscriptionPlanDto } from './dto/create-subscription-plans.dto';
+import { UpdateSubscriptionPlansDto } from './dto/update-subscription-plans.dto';
+import { SubscriptionPlan } from './domain/subscription-plans';
+import { RolesGuard } from '../roles/roles.guard';
+import { Creator } from '../auth/decorators/creator.decorator';
 
-@ApiTags('Subscriptionplans')
+@ApiTags('Subscription Plans')
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
 @Controller({
@@ -41,72 +35,41 @@ export class SubscriptionPlansController {
   ) {}
 
   @Post()
-  @ApiCreatedResponse({
-    type: SubscriptionPlans,
-  })
-  create(@Body() createSubscriptionPlansDto: CreateSubscriptionPlansDto) {
-    return this.subscriptionPlansService.create(createSubscriptionPlansDto);
-  }
-
-  @Get()
-  @ApiOkResponse({
-    type: InfinityPaginationResponse(SubscriptionPlans),
-  })
-  async findAll(
-    @Query() query: FindAllSubscriptionPlansDto,
-  ): Promise<InfinityPaginationResponseDto<SubscriptionPlans>> {
-    const page = query?.page ?? 1;
-    let limit = query?.limit ?? 10;
-    if (limit > 50) {
-      limit = 50;
-    }
-
-    return infinityPagination(
-      await this.subscriptionPlansService.findAllWithPagination({
-        paginationOptions: {
-          page,
-          limit,
-        },
-      }),
-      { page, limit },
-    );
+  @Creator()
+  @ApiOperation({ summary: 'Create subscription plan' })
+  @ApiResponse({ type: SubscriptionPlan })
+  create(@Body() createDto: CreateSubscriptionPlanDto) {
+    return this.subscriptionPlansService.create(createDto);
   }
 
   @Get(':id')
-  @ApiParam({
-    name: 'id',
-    type: String,
-    required: true,
-  })
-  @ApiOkResponse({
-    type: SubscriptionPlans,
-  })
+  @ApiOperation({ summary: 'Get subscription plan by id' })
+  @ApiResponse({ type: SubscriptionPlan })
   findById(@Param('id') id: string) {
     return this.subscriptionPlansService.findById(id);
   }
 
+  @Get('creator/:creatorId')
+  @ApiOperation({ summary: 'Get subscription plans by creator id' })
+  @ApiResponse({ type: [SubscriptionPlan] })
+  findByCreatorId(@Param('creatorId') creatorId: string) {
+    return this.subscriptionPlansService.findByCreatorId(creatorId);
+  }
+
   @Patch(':id')
-  @ApiParam({
-    name: 'id',
-    type: String,
-    required: true,
-  })
-  @ApiOkResponse({
-    type: SubscriptionPlans,
-  })
+  @Creator()
+  @ApiOperation({ summary: 'Update subscription plan' })
+  @ApiResponse({ type: SubscriptionPlan })
   update(
     @Param('id') id: string,
-    @Body() updateSubscriptionPlansDto: UpdateSubscriptionPlansDto,
+    @Body() updateDto: UpdateSubscriptionPlansDto,
   ) {
-    return this.subscriptionPlansService.update(id, updateSubscriptionPlansDto);
+    return this.subscriptionPlansService.update(id, updateDto);
   }
 
   @Delete(':id')
-  @ApiParam({
-    name: 'id',
-    type: String,
-    required: true,
-  })
+  @Creator()
+  @ApiOperation({ summary: 'Delete subscription plan' })
   remove(@Param('id') id: string) {
     return this.subscriptionPlansService.remove(id);
   }
