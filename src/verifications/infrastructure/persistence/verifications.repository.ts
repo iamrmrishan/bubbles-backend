@@ -18,6 +18,8 @@ export abstract class VerificationsRepository {
     id: Verifications['id'],
   ): Promise<NullableType<Verifications>>;
 
+  abstract findByUserId(userId: string): Promise<NullableType<Verifications>>;
+
   abstract findByIds(ids: Verifications['id'][]): Promise<Verifications[]>;
 
   abstract update(

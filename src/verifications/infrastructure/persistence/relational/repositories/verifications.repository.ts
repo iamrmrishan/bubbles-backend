@@ -38,6 +38,14 @@ export class VerificationsRelationalRepository
     return entities.map((entity) => VerificationsMapper.toDomain(entity));
   }
 
+  async findByUserId(userId: string): Promise<NullableType<Verifications>> {
+    const entity = await this.verificationsRepository.findOne({
+      where: { user: { id: userId } },
+      relations: ['user'],
+    });
+    return entity ? VerificationsMapper.toDomain(entity) : null;
+  }
+
   async findById(
     id: Verifications['id'],
   ): Promise<NullableType<Verifications>> {

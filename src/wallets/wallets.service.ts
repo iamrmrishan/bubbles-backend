@@ -33,8 +33,8 @@ export class WalletsService {
       throw new Error('User email is required for Stripe account creation');
     }
 
-    const verifiedUserDetails = await this.verificationService.findById(
-      createWalletDto.owner.id.toString(),
+    const verifiedUserDetails = await this.verificationService.findByUserId(
+      user.id.toString(),
     );
 
     if (!verifiedUserDetails) {

@@ -41,6 +41,7 @@ export class VerificationsMapper {
       domainEntity.user = UserMapper.toDomain(raw.user);
     }
 
+
     domainEntity.id = raw.id;
     domainEntity.createdAt = raw.createdAt;
     domainEntity.updatedAt = raw.updatedAt;
@@ -83,7 +84,9 @@ export class VerificationsMapper {
     persistenceEntity.fullName = domainEntity.fullName;
 
     if (domainEntity.user) {
+      console.log(persistenceEntity.user, 'this is entity user');
       persistenceEntity.user = UserMapper.toPersistence(domainEntity.user);
+      console.log(persistenceEntity.user, 'this is entity new user');
     }
 
     if (domainEntity.id) {

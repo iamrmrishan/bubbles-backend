@@ -19,7 +19,6 @@ import { SubscriptionPlansService } from './subscription-plans.service';
 import { CreateSubscriptionPlanDto } from './dto/create-subscription-plans.dto';
 import { UpdateSubscriptionPlansDto } from './dto/update-subscription-plans.dto';
 import { SubscriptionPlan } from './domain/subscription-plans';
-import { RolesGuard } from '../roles/roles.guard';
 import { Creator } from '../auth/decorators/creator.decorator';
 
 @ApiTags('Subscription Plans')

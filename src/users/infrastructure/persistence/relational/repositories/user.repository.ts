@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { FindOptionsWhere, Repository, In } from 'typeorm';
@@ -101,23 +101,26 @@ export class UsersRelationalRepository implements UserRepository {
 
   async update(id: User['id'], payload: Partial<User>): Promise<User> {
     const entity = await this.usersRepository.findOne({
-      where: { id: id },
+      where: { id },
+      relations: ['role', 'status', 'photo', 'coverPhoto', 'wallet']
     });
-
+  
     if (!entity) {
       throw new Error('User not found');
     }
-
-    const updatedEntity = await this.usersRepository.save(
-      this.usersRepository.create(
-        UserMapper.toPersistence({
-          ...UserMapper.toDomain(entity),
-          ...payload,
-        }),
-      ),
+  
+    // Merge existing entity with the new payload while preserving the ID
+    const mergedEntity = this.usersRepository.merge(
+      entity,
+      UserMapper.toPersistence({
+        ...UserMapper.toDomain(entity),
+        ...payload,
+        id: entity.id // Ensure ID is preserved
+      })
     );
-
-    return UserMapper.toDomain(updatedEntity);
+  
+    const savedEntity = await this.usersRepository.save(mergedEntity);
+    return UserMapper.toDomain(savedEntity);
   }
 
   async remove(id: User['id']): Promise<void> {

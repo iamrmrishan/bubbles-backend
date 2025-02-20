@@ -57,6 +57,7 @@ export class VerificationsService {
     const userObject = await this.userService.findById(
       createVerificationsDto.user.id.toString(),
     );
+  
     if (!userObject) {
       throw new UnprocessableEntityException({
         status: HttpStatus.UNPROCESSABLE_ENTITY,
@@ -66,6 +67,7 @@ export class VerificationsService {
       });
     }
     const user = userObject;
+    console.log(user, 'this is the user');
 
     return this.verificationsRepository.create({
       // Do not remove comment below.
@@ -117,6 +119,10 @@ export class VerificationsService {
 
   findByIds(ids: Verifications['id'][]) {
     return this.verificationsRepository.findByIds(ids);
+  }
+
+  async findByUserId(userId: string) {
+    return this.verificationsRepository.findByUserId(userId);
   }
 
   async update(

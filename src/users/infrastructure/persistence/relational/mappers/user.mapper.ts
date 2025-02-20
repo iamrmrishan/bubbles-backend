@@ -77,7 +77,7 @@ export class UserMapper {
 
     persistenceEntity.userName = domainEntity.userName;
 
-    if (domainEntity.id && typeof domainEntity.id === 'number') {
+    if (domainEntity.id) {
       persistenceEntity.id = domainEntity.id;
     }
     persistenceEntity.email = domainEntity.email;
