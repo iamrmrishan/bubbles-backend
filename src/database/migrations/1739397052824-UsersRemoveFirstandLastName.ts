@@ -7,7 +7,7 @@ export class UsersRemoveFirstandLastName1739397052824
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Check if firstName column exists before adding
-    const hasFirstNameColumn = await queryRunner.hasColumn("user", "firstName");
+    const hasFirstNameColumn = await queryRunner.hasColumn('user', 'firstName');
     if (!hasFirstNameColumn) {
       await queryRunner.query(
         `ALTER TABLE "user" ADD "firstName" character varying`,
@@ -15,7 +15,7 @@ export class UsersRemoveFirstandLastName1739397052824
     }
 
     // Check if lastName column exists before adding
-    const hasLastNameColumn = await queryRunner.hasColumn("user", "lastName");
+    const hasLastNameColumn = await queryRunner.hasColumn('user', 'lastName');
     if (!hasLastNameColumn) {
       await queryRunner.query(
         `ALTER TABLE "user" ADD "lastName" character varying`,
@@ -32,7 +32,10 @@ export class UsersRemoveFirstandLastName1739397052824
       );
     } catch (error) {
       // Index might already exist, continue
-      console.log('Index creation failed, might already exist: ', error.message);
+      console.log(
+        'Index creation failed, might already exist: ',
+        error.message,
+      );
     }
   }
 
@@ -45,7 +48,7 @@ export class UsersRemoveFirstandLastName1739397052824
     } catch (error) {
       console.log('Drop index failed: ', error.message);
     }
-    
+
     try {
       await queryRunner.query(
         `DROP INDEX IF EXISTS "public"."IDX_58e4dbff0e1a32a9bdc861bb29"`,
@@ -53,8 +56,12 @@ export class UsersRemoveFirstandLastName1739397052824
     } catch (error) {
       console.log('Drop index failed: ', error.message);
     }
-    
-    await queryRunner.query(`ALTER TABLE "user" DROP COLUMN IF EXISTS "lastName"`);
-    await queryRunner.query(`ALTER TABLE "user" DROP COLUMN IF EXISTS "firstName"`);
+
+    await queryRunner.query(
+      `ALTER TABLE "user" DROP COLUMN IF EXISTS "lastName"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "user" DROP COLUMN IF EXISTS "firstName"`,
+    );
   }
 }
