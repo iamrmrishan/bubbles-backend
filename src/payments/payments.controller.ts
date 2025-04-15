@@ -99,7 +99,7 @@ export class PaymentsController {
   @ApiOkResponse({ type: [Payment] })
   @ApiQuery({ type: PaymentFilterDto })
   async findAll(@Query() filterDto: PaymentFilterDto, @GetUser() user: User) {
-    return this.paymentsService.findAll(filterDto, user);
+    return this.paymentsService.findAll(filterDto);
   }
 
   @Get('wallet/:walletId')

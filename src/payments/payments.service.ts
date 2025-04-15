@@ -201,7 +201,7 @@ export class PaymentsService {
     return payment;
   }
 
-  async findAll(filterDto: PaymentFilterDto, user: User) {
+  async findAll(filterDto: PaymentFilterDto) {
     const query = this.paymentRepository
       .createQueryBuilder('payment')
       .leftJoinAndSelect('payment.fromWallet', 'fromWallet')

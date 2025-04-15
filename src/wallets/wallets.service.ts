@@ -44,20 +44,25 @@ export class WalletsService {
       });
     }
 
-    const stripeId = user.isCreator
-      ? await this.paymentPort.createConnectedAccount({
+       // Always create a customer ID for payments
+       const customerStripeId = await this.paymentPort.createCustomer({
+        email: user.email,
+        name: verifiedUserDetails?.fullName || user.email,
+      });
+  
+      // If user is creator, also create a connected account
+      let accountStripeId: string | null = null;
+      if (user.isCreator) {
+        accountStripeId = await this.paymentPort.createConnectedAccount({
           email: user.email,
           country: 'US',
-        })
-      : await this.paymentPort.createCustomer({
-          email: user.email,
-          name: verifiedUserDetails?.fullName || user.email, // fallback to email if no name
         });
+      }
     return this.walletRepository.create({
       owner: user,
       balance: 0,
-      stripeAccountId: user.isCreator ? stripeId : null,
-      stripeCustomerId: !user.isCreator ? stripeId : null,
+      stripeAccountId: accountStripeId,
+      stripeCustomerId: customerStripeId,
       currency: 'USD',
       isActive: false,
     });

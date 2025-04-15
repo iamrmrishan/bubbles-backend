@@ -1,5 +1,11 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsEmail, IsNotEmpty, IsOptional, MinLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  MinLength,
+} from 'class-validator';
 import { FileDto } from '../../files/dto/file.dto';
 import { Transform } from 'class-transformer';
 import { lowerCaseTransformer } from '../../utils/transformers/lower-case.transformer';
@@ -16,7 +22,10 @@ export class AuthUpdateDto {
   @Transform(lowerCaseTransformer)
   email?: string;
 
-  @ApiPropertyOptional({ description: 'Flag to mark user as creator', type: Boolean })
+  @ApiPropertyOptional({
+    description: 'Flag to mark user as creator',
+    type: Boolean,
+  })
   @IsOptional()
   @IsBoolean()
   isCreator?: boolean;

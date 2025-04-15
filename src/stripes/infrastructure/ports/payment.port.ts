@@ -16,6 +16,7 @@ export interface CreateSubscriptionProductDto {
   amount: number;
   interval: 'day' | 'week' | 'month' | 'year';
   intervalCount: number;
+  stripeAccountId: string;
 }
 
 export interface CreateSubscriptionPriceDto {

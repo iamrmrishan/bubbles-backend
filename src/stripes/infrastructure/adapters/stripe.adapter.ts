@@ -133,27 +133,41 @@ export class StripeAdapter implements PaymentPort {
     amount,
     interval,
     intervalCount,
+    stripeAccountId,
   }: {
     name: string;
     description: string;
     amount: number;
     interval: 'day' | 'week' | 'month' | 'year';
     intervalCount: number;
+    stripeAccountId: string;
   }) {
-    const product = await this.stripe.products.create({
-      name,
-      description,
-    });
-
-    const price = await this.stripe.prices.create({
-      product: product.id,
-      unit_amount: Math.round(amount * 100),
-      currency: 'usd',
-      recurring: {
-        interval,
-        interval_count: intervalCount,
+    // Create product under creator's connected account
+    const product = await this.stripe.products.create(
+      {
+        name,
+        description,
       },
-    });
+      {
+        stripeAccount: stripeAccountId,
+      },
+    );
+
+    // Create price under creator's connected account
+    const price = await this.stripe.prices.create(
+      {
+        product: product.id,
+        unit_amount: Math.round(amount * 100),
+        currency: 'usd',
+        recurring: {
+          interval,
+          interval_count: intervalCount,
+        },
+      },
+      {
+        stripeAccount: stripeAccountId, // Add this option
+      },
+    );
 
     return {
       productId: product.id,

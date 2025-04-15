@@ -12,6 +12,7 @@ import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { SubscriptionStatus } from '../subscriptions/domain/subscriptions';
 import { DeepPartial } from 'typeorm';
 import { SubscriptionPlan } from './domain/subscription-plans';
+import { WalletsService } from '../wallets/wallets.service';
 
 @Injectable()
 export class SubscriptionPlansService {
@@ -20,6 +21,7 @@ export class SubscriptionPlansService {
     private readonly usersService: UsersService,
     private readonly subscriptionsService: SubscriptionsService,
     private readonly stripeService: StripeService,
+    private readonly walletsService: WalletsService,
   ) {}
 
   async create(createDto: CreateSubscriptionPlanDto) {
@@ -27,8 +29,7 @@ export class SubscriptionPlansService {
     const creator = await this.usersService.findById(
       createDto.creator.id.toString(),
     );
-    // Log the found creator
-    console.log('Found creator:', creator);
+
     if (!creator) {
       throw new UnprocessableEntityException({
         status: HttpStatus.UNPROCESSABLE_ENTITY,
@@ -43,7 +44,16 @@ export class SubscriptionPlansService {
       });
     }
 
-    // Create Stripe product and price
+    // Get creator's wallet to access their Stripe account ID
+    const creatorWallet = await this.walletsService.findByUserId(creator.id);
+    if (!creatorWallet?.stripeAccountId) {
+      throw new UnprocessableEntityException({
+        status: HttpStatus.UNPROCESSABLE_ENTITY,
+        errors: { wallet: 'creatorStripeAccountNotFound' },
+      });
+    }
+
+    // Create Stripe product and price under creator's account
     const { productId, priceId } =
       await this.stripeService.createSubscriptionProduct({
         name: createDto.name,
@@ -51,16 +61,8 @@ export class SubscriptionPlansService {
         amount: createDto.price,
         interval: 'month',
         intervalCount: createDto.duration,
+        stripeAccountId: creatorWallet.stripeAccountId,
       });
-
-    // Log what we're passing to repository create
-    const createData = {
-      ...createDto,
-      creator,
-      stripeProductId: productId,
-      stripePriceId: priceId,
-    };
-    // console.log('Data being passed to repository create:', createData);
 
     // Create subscription plan
     return this.subscriptionPlanRepository.create({
