@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
@@ -12,13 +13,25 @@ export class SesMailerService {
   private readonly sesClient: SESClient;
 
   constructor(private readonly configService: ConfigService<AllConfigType>) {
+    const accessKeyId = this.configService.get('mail.accessKeyId', {
+      infer: true,
+    });
+    const secretAccessKey = this.configService.get('mail.secretAccessKey', {
+      infer: true,
+    });
+    const region = this.configService.get('mail.awsRegion', { infer: true });
+
+    if (!accessKeyId || !secretAccessKey || !region) {
+      throw new Error(
+        'AWS SES credentials or region are not properly configured',
+      );
+    }
+
     this.sesClient = new SESClient({
-      region: configService.get('mail.awsRegion', { infer: true }),
+      region,
       credentials: {
-        accessKeyId: configService.get('mail.accessKeyId', { infer: true }),
-        secretAccessKey: configService.get('mail.secretAccessKey', {
-          infer: true,
-        }),
+        accessKeyId,
+        secretAccessKey,
       },
     });
   }
@@ -38,8 +51,7 @@ export class SesMailerService {
   }): Promise<void> {
     let html: string | undefined = mailOptions.html;
 
-    // If a template was provided, we'll ignore it since SES has its own templates
-    // But we'll keep this logic for compatibility with the previous implementation
+    // Convert plain text to HTML if needed
     if (!html && mailOptions.text) {
       html = `<pre>${mailOptions.text}</pre>`;
     }

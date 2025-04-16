@@ -1,22 +1,33 @@
-FROM node:22.13.0-alpine
+# Use specific Node.js version
+FROM node:22.13.0-alpine AS builder
 
-RUN apk add --no-cache bash
-RUN npm i -g @nestjs/cli typescript ts-node
+# Set working directory
+WORKDIR /app
 
-COPY package*.json /tmp/app/
-RUN cd /tmp/app && npm install
+# Copy and install only production dependencies
+COPY package*.json ./
+RUN npm ci
 
-COPY . /usr/src/app
-RUN cp -a /tmp/app/node_modules /usr/src/app
-COPY ./wait-for-it.sh /opt/wait-for-it.sh
-RUN chmod +x /opt/wait-for-it.sh
-COPY ./startup.relational.dev.sh /opt/startup.relational.dev.sh
-RUN chmod +x /opt/startup.relational.dev.sh
-RUN sed -i 's/\r//g' /opt/wait-for-it.sh
-RUN sed -i 's/\r//g' /opt/startup.relational.dev.sh
+# Copy rest of the application
+COPY . .
 
-WORKDIR /usr/src/app
-RUN if [ ! -f .env ]; then cp env-example-relational .env; fi
-RUN npm run build
+# Build the NestJS app
+RUN npm run prebuild && npm run build
 
-CMD ["/opt/startup.relational.dev.sh"]
+# Use a smaller image for production
+FROM node:22.13.0-alpine AS production
+
+# Set working directory
+WORKDIR /app
+
+# Copy only necessary files from builder
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/dist ./dist
+
+# Expose app port
+EXPOSE 3000
+
+# Run the application
+CMD ["node", "dist/main"]
+
