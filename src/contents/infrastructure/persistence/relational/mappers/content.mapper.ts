@@ -18,6 +18,12 @@ export class ContentMapper {
     }
 
     domainEntity.id = raw.id;
+    domainEntity.visibility = raw.visibility as
+      | 'public'
+      | 'followers'
+      | 'subscribers';
+    domainEntity.ppvPrice = raw.ppvPrice as number;
+    domainEntity.tags = raw.tags as string[];
     domainEntity.createdAt = raw.createdAt;
     domainEntity.updatedAt = raw.updatedAt;
 
@@ -44,6 +50,9 @@ export class ContentMapper {
     if (domainEntity.id) {
       persistenceEntity.id = domainEntity.id;
     }
+    persistenceEntity.visibility = domainEntity.visibility;
+    persistenceEntity.ppvPrice = domainEntity.ppvPrice;
+    persistenceEntity.tags = domainEntity.tags;
     persistenceEntity.createdAt = domainEntity.createdAt;
     persistenceEntity.updatedAt = domainEntity.updatedAt;
 

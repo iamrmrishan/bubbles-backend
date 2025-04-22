@@ -9,9 +9,11 @@ import {
   IsString,
   IsOptional,
   IsArray,
+  IsNumber,
 } from 'class-validator';
 
 import { ApiProperty } from '@nestjs/swagger';
+import { CreateContentAttributesDto } from '../../content-attributes/dto/create-content-attributes.dto';
 
 export class CreateContentDto {
   @ApiProperty({
@@ -37,6 +39,29 @@ export class CreateContentDto {
   @Type(() => UserDto)
   @IsNotEmptyObject()
   creator: UserDto;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tags?: string[];
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  visibility?: 'public' | 'followers' | 'subscribers';
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  ppvPrice?: number;
+
+  @ApiProperty({ required: false, type: [CreateContentAttributesDto] })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateContentAttributesDto)
+  attributes?: CreateContentAttributesDto[];
 
   @ApiProperty({
     required: false,

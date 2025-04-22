@@ -32,6 +32,15 @@ export class ContentEntity extends EntityRelationalHelper {
   @ManyToOne(() => UserEntity, { eager: true, nullable: false })
   creator: UserEntity;
 
+  @Column({ nullable: true, type: 'text' })
+  visibility?: string;
+
+  @Column({ nullable: true, type: 'decimal' })
+  ppvPrice?: number;
+
+  @Column('text', { array: true, nullable: true })
+  tags?: string[];
+
   @ManyToMany(() => FileEntity, { eager: true })
   @JoinTable({ name: 'content_media' })
   media?: FileEntity[] | null;

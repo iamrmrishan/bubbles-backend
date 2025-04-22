@@ -32,6 +32,15 @@ export class Content {
   })
   id: string;
 
+  @ApiProperty({ type: String, nullable: true })
+  visibility?: 'public' | 'followers' | 'subscribers';
+
+  @ApiProperty({ type: Number, nullable: true })
+  ppvPrice?: number;
+
+  @ApiProperty({ type: [String], nullable: true })
+  tags?: string[];
+
   @ApiProperty()
   createdAt: Date;
 

@@ -44,20 +44,20 @@ export class WalletsService {
       });
     }
 
-       // Always create a customer ID for payments
-       const customerStripeId = await this.paymentPort.createCustomer({
+    // Always create a customer ID for payments
+    const customerStripeId = await this.paymentPort.createCustomer({
+      email: user.email,
+      name: verifiedUserDetails?.fullName || user.email,
+    });
+
+    // If user is creator, also create a connected account
+    let accountStripeId: string | null = null;
+    if (user.isCreator) {
+      accountStripeId = await this.paymentPort.createConnectedAccount({
         email: user.email,
-        name: verifiedUserDetails?.fullName || user.email,
+        country: 'US',
       });
-  
-      // If user is creator, also create a connected account
-      let accountStripeId: string | null = null;
-      if (user.isCreator) {
-        accountStripeId = await this.paymentPort.createConnectedAccount({
-          email: user.email,
-          country: 'US',
-        });
-      }
+    }
     return this.walletRepository.create({
       owner: user,
       balance: 0,

@@ -57,7 +57,7 @@ export class VerificationsService {
     const userObject = await this.userService.findById(
       createVerificationsDto.user.id.toString(),
     );
-  
+
     if (!userObject) {
       throw new UnprocessableEntityException({
         status: HttpStatus.UNPROCESSABLE_ENTITY,

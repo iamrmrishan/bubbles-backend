@@ -41,7 +41,6 @@ export class VerificationsMapper {
       domainEntity.user = UserMapper.toDomain(raw.user);
     }
 
-
     domainEntity.id = raw.id;
     domainEntity.createdAt = raw.createdAt;
     domainEntity.updatedAt = raw.updatedAt;

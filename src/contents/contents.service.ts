@@ -13,6 +13,7 @@ import { UpdateContentDto } from './dto/update-content.dto';
 import { ContentRepository } from './infrastructure/persistence/content.repository';
 import { IPaginationOptions } from '../utils/types/pagination-options';
 import { Content } from './domain/content';
+import { ContentAttributesService } from '../content-attributes/content-attributes.service';
 
 @Injectable()
 export class ContentsService {
@@ -20,6 +21,7 @@ export class ContentsService {
     private readonly userService: UsersService,
     private readonly filesService: FilesService,
     private readonly contentRepository: ContentRepository,
+    private readonly contentAttributesService: ContentAttributesService,
   ) {}
 
   async create(createContentDto: CreateContentDto) {
@@ -52,12 +54,27 @@ export class ContentsService {
       media = files;
     }
 
-    return this.contentRepository.create({
+    const content = await this.contentRepository.create({
       description: createContentDto.description,
       title: createContentDto.title,
       creator,
       media,
+      visibility: createContentDto.visibility,
+      ppvPrice: createContentDto.ppvPrice,
+      tags: createContentDto.tags,
     });
+
+    if (createContentDto.attributes?.length) {
+      await Promise.all(
+        createContentDto.attributes.map((attr) =>
+          this.contentAttributesService.create({
+            ...attr,
+            content: { id: content.id },
+          }),
+        ),
+      );
+    }
+    return content;
   }
 
   findAllWithPagination({

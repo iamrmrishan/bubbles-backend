@@ -1,7 +1,12 @@
 import { ContentsService } from '../contents/contents.service';
 import { Content } from '../contents/domain/content';
 
-import { HttpStatus, UnprocessableEntityException } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpStatus,
+  Inject,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 
 import { Injectable } from '@nestjs/common';
 import { CreateContentAttributesDto } from './dto/create-content-attributes.dto';
@@ -13,7 +18,8 @@ import { ContentAttributes } from './domain/content-attributes';
 @Injectable()
 export class ContentAttributesService {
   constructor(
-    private readonly contentsService: ContentsService,
+    @Inject(forwardRef(() => ContentsService))
+    private contentsService: ContentsService,
 
     // Dependencies here
     private readonly contentAttributesRepository: ContentAttributesRepository,
